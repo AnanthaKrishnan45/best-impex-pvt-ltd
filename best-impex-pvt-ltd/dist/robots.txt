@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://best-impex-spices.exoticdune16.chatgpt.site/sitemap.xml
