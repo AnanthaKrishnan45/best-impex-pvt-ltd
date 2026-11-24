@@ -7,6 +7,12 @@ Run `npm run build` to regenerate the homepage, product pages, legal pages and s
 - The photographs are generated editorial illustrations. Replace them under `dist/assets/` with verified company or lot imagery as it becomes available.
 - Currency conversions use the ExchangeRate-API USD feed. The site shows the published rate date, a reference conversion, and an unavailable state on failure.
 
+## GitHub Pages
+
+The GitHub Pages build is in `docs/`. To publish it from the GitHub repository, open **Settings → Pages**, select **Deploy from a branch**, then choose **main** and **/docs** and save. After deployment, the project URL is https://ananthakrishnan45.github.io/best-impex-pvt-ltd/.
+
+After editing the website, run `npm run build` and `npm run build:pages` before committing. Use a GitHub plan that supports Pages from a private repository if you want to keep the source private.
+
 ## Enquiry service
 
 The default configuration keeps the enquiry on the visitor's device and lets them review and send a prepared message by email or WhatsApp. To enable direct web delivery, set `settings.enquiryEndpoint` to your HTTPS service or a same-origin API route. Both forms send a JSON POST with a `type` field and the named form inputs. The endpoint must validate input on the server, rate-limit submissions, forward to the company inbox or record the enquiry, and return HTTP 2xx with `{"accepted":true}` only after accepting it. If cross-origin, permit the website origin and the JSON POST preflight. Keep service credentials on the server. The browser uses the contact options when online delivery fails or is unconfigured.

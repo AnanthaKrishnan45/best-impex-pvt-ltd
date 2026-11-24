@@ -1,7 +1,15 @@
-import { writeFile, mkdir } from 'node:fs/promises';
+import { cp, writeFile, mkdir } from 'node:fs/promises';
 import { company, spices, units, currencies, packaging } from './dist/data.js';
 import { codes } from './dist/countries.js';
 
+const githubPages = process.argv.includes('--github-pages');
+const output = githubPages ? 'docs' : 'dist';
+const site = new URL(githubPages
+  ? 'https://ananthakrishnan45.github.io/best-impex-pvt-ltd/'
+  : company.origin);
+const basePath = site.pathname.replace(/\/$/, '');
+const sitePath = path => basePath + path;
+const absolute = path => site.origin + sitePath(path);
 const img = '/assets/';
 const paths = spices.map(spice => '/spices/' + spice.id + '/');
 const menu = [
@@ -25,30 +33,30 @@ const label = text => `<p class="eyebrow"><span aria-hidden="true"></span>${text
 const button = (href, text, style = 'primary') => `<a class="button ${style}" href="${href}">${text}</a>`;
 const whatsapp = company.whatsapp + '?text=' + encodeURIComponent(company.whatsappMessage);
 const map = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(company.address);
-const image = (name, alt, cls = '', lazy = true) => `<img class="${cls}" src="${img}${name}.webp" alt="${alt}" ${lazy ? 'loading="lazy" decoding="async"' : 'fetchpriority="high"'}>`;
+const image = (name, alt, cls = '', lazy = true) => `<img class="${cls}" src="${sitePath(img)}${name}.webp" alt="${alt}" ${lazy ? 'loading="lazy" decoding="async"' : 'fetchpriority="high"'}>`;
 const logo = `<span class="brand-mark">${icon('leaf')}</span><span class="brand-name">BEST IMPEX<small>PVT LTD</small></span>`;
 const nav = `<a class="skip" href="#main">Skip to content</a><header class="header">
-  <div class="header-inner"><a class="brand" href="/#home" aria-label="BEST IMPEX PVT LTD home">${logo}</a>
+  <div class="header-inner"><a class="brand" href="${sitePath('/#home')}" aria-label="BEST IMPEX PVT LTD home">${logo}</a>
   <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" aria-label="Open navigation"><span></span><span></span></button>
-  <nav id="navigation" aria-label="Main navigation">${menu.map(([id,title]) => `<a href="/#${id}" data-section="${id}">${title}</a>`).join('')}</nav>
-  ${button('/#bulk', 'Request a Quote', 'header-quote')}</div></header>`;
+  <nav id="navigation" aria-label="Main navigation">${menu.map(([id,title]) => `<a href="${sitePath('/#')}${id}" data-section="${id}">${title}</a>`).join('')}</nav>
+  ${button(sitePath('/#bulk'), 'Request a Quote', 'header-quote')}</div></header>`;
 const footer = `<footer class="footer"><div class="container">
-  <div class="footer-grid"><div><a class="brand" href="/#home" aria-label="BEST IMPEX PVT LTD home">${logo}</a><p>International spice trading and bulk supply enquiries from Chennai, India.</p></div>
-  <div><h2>Quick links</h2>${menu.map(([id,title]) => `<a href="/#${id}">${title}</a>`).join('')}</div>
-  <div><h2>Our spices</h2><div class="footer-spices">${spices.map((spice, i) => `<a href="${paths[i]}">${spice.name}</a>`).join('')}</div></div>
+  <div class="footer-grid"><div><a class="brand" href="${sitePath('/#home')}" aria-label="BEST IMPEX PVT LTD home">${logo}</a><p>International spice trading and bulk supply enquiries from Chennai, India.</p></div>
+  <div><h2>Quick links</h2>${menu.map(([id,title]) => `<a href="${sitePath('/#')}${id}">${title}</a>`).join('')}</div>
+  <div><h2>Our spices</h2><div class="footer-spices">${spices.map((spice, i) => `<a href="${sitePath(paths[i])}">${spice.name}</a>`).join('')}</div></div>
   <div><h2>Contact</h2><a href="mailto:${company.email}">${company.email}</a><a href="tel:${company.telephone}">${company.phone}</a><a href="${whatsapp}">WhatsApp</a><a class="footer-address" href="${map}">${company.address}</a></div></div>
-  <div class="footer-base"><span>© 2026 BEST IMPEX PVT LTD. All Rights Reserved.</span><div><a href="/privacy/">Privacy Policy</a><a href="/terms/">Terms and Conditions</a></div></div>
+  <div class="footer-base"><span>© 2026 BEST IMPEX PVT LTD. All Rights Reserved.</span><div><a href="${sitePath('/privacy/')}">Privacy Policy</a><a href="${sitePath('/terms/')}">Terms and Conditions</a></div></div>
   </div></footer>`;
 
 const page = ({title, description, path = '/', photo = 'hero', schema, html}) => `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title}</title><meta name="description" content="${description}">
-<link rel="canonical" href="${company.origin}${path}"><meta name="theme-color" content="#12251d">
+<link rel="canonical" href="${absolute(path)}"><meta name="theme-color" content="#12251d">
 <meta property="og:type" content="${path.startsWith('/spices/') ? 'product' : 'website'}"><meta property="og:title" content="${title}">
-<meta property="og:description" content="${description}"><meta property="og:url" content="${company.origin}${path}">
-<meta property="og:image" content="${company.origin}${img}${photo}.webp">
-<link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script>
+<meta property="og:description" content="${description}"><meta property="og:url" content="${absolute(path)}">
+<meta property="og:image" content="${absolute(img + photo + '.webp')}">
+<link rel="icon" href="${sitePath('/assets/mark.svg')}" type="image/svg+xml">
+<link rel="stylesheet" href="${sitePath('/style.css')}"><script type="module" src="${sitePath('/app.js')}"></script>
 ${schema ? `<script type="application/ld+json">${JSON.stringify(schema).replaceAll('<','\\u003c')}</script>` : ''}
 </head><body>${nav}<main id="main">${html}</main>${footer}</body></html>`;
 
@@ -106,7 +114,7 @@ const homeHTML = `<section class="hero" id="home">
 </section>
 <section id="spices" class="section catalogue"><div class="container">
   <div class="collection-head reveal"><div>${label('THE ART OF SPICES')}<h2>The Spice Collection</h2></div><p>Discover twelve whole and ground spices for wholesale, food manufacturing and international trade.</p></div>
-  <div class="spice-grid">${spices.map((spice,i) => `<a class="spice-card reveal" href="${paths[i]}"><div class="spice-image">${image(spice.id,spice.name)}<span class="card-action" aria-hidden="true">+</span></div><div class="spice-title"><h3>${spice.name}</h3><p>${spice.botanical}</p></div></a>`).join('')}</div>
+  <div class="spice-grid">${spices.map((spice,i) => `<a class="spice-card reveal" href="${sitePath(paths[i])}"><div class="spice-image">${image(spice.id,spice.name)}<span class="card-action" aria-hidden="true">+</span></div><div class="spice-title"><h3>${spice.name}</h3><p>${spice.botanical}</p></div></a>`).join('')}</div>
 </div></section>
 <section class="section about" id="about"><div class="container editorial">
   <div class="editorial-image reveal">${image('story','A spice trader inspecting whole spices above jute sacks')}<div class="photo-caption">Chennai, Tamil Nadu, India</div></div>
@@ -121,7 +129,7 @@ const homeHTML = `<section class="hero" id="home">
 <section class="section culinary" id="culinary"><div class="container">
   <div class="collection-head reveal"><div>${label('CULINARY USES')}<h2>From Nature to Your Kitchen</h2></div><p>See how each spice shapes a dish, from the first aroma to the final bite.</p></div>
   <div class="culinary-layout"><div class="story-picker" role="group" aria-label="Choose a spice">${spices.map((spice, i) => `<button type="button" data-story="${spice.id}" aria-pressed="${i===0}">${spice.name}</button>`).join('')}</div>
-    <div class="story-panel" aria-live="polite"><div class="story-photo">${image('food-black-pepper',spices[0].dish)}</div><div class="story-copy"><p data-story-name class="eyebrow">${spices[0].name}</p><h3 data-dish>${spices[0].dish}</h3><p data-story-text>${spices[0].story}</p><a class="text-link" data-story-link href="${paths[0]}">Explore this spice</a></div></div>
+    <div class="story-panel" aria-live="polite"><div class="story-photo">${image('food-black-pepper',spices[0].dish)}</div><div class="story-copy"><p data-story-name class="eyebrow">${spices[0].name}</p><h3 data-dish>${spices[0].dish}</h3><p data-story-text>${spices[0].story}</p><a class="text-link" data-story-link href="${sitePath(paths[0])}">Explore this spice</a></div></div>
   </div>
 </div></section>
 <section class="section export" id="export"><div class="container">
@@ -165,9 +173,16 @@ const homeHTML = `<section class="hero" id="home">
 </div></section>`;
 
 const description = 'Explore twelve wholesale spices, from black pepper and cardamom to turmeric. Request bulk export quotations from BEST IMPEX PVT LTD in Chennai, India.';
-await writeFile('dist/index.html', page({
+await mkdir(output, {recursive:true});
+if (githubPages) {
+  await Promise.all(['assets','app.js','countries.js','data.js','style.css'].map(file =>
+    cp('dist/' + file, output + '/' + file, {recursive:true}),
+  ));
+  await writeFile(output + '/.nojekyll', '');
+}
+await writeFile(output + '/index.html', page({
   title: 'BEST IMPEX PVT LTD | Bulk Spice Suppliers in Chennai, India', description,
-  schema: {'@context':'https://schema.org','@type':'Organization',name:company.name,url:company.origin,
+  schema: {'@context':'https://schema.org','@type':'Organization',name:company.name,url:absolute('/'),
     email:company.email,telephone:company.telephone,foundingDate:'2026-11',
     address:{'@type':'PostalAddress',streetAddress:'Old No.11, G-1, 21/1, New, Asoka Ave, Kodambakkam',addressLocality:'Chennai',addressRegion:'Tamil Nadu',postalCode:'600024',addressCountry:'IN'}},
   html: homeHTML,
@@ -175,20 +190,20 @@ await writeFile('dist/index.html', page({
 
 await Promise.all(spices.map(async (spice,i) => {
   const path = paths[i];
-  await mkdir('dist'+path,{recursive:true});
-  await writeFile('dist'+path+'index.html',page({
+  await mkdir(output+path,{recursive:true});
+  await writeFile(output+path+'index.html',page({
     title: `${spice.name} | Wholesale Spice | BEST IMPEX PVT LTD`,
     description: `Explore ${spice.name.toLowerCase()}, its typical origins, flavour and culinary uses. Discuss bulk supply and export packaging with BEST IMPEX PVT LTD.`,
     path, photo:spice.id,
-    schema:{'@context':'https://schema.org','@type':'Product',name:spice.name,image:company.origin+img+spice.id+'.webp',description:spice.flavour,category:'Spices'},
+    schema:{'@context':'https://schema.org','@type':'Product',name:spice.name,image:absolute(img+spice.id+'.webp'),description:spice.flavour,category:'Spices'},
     html: `<section class="product-hero"><div class="container editorial"><div class="product-copy">
-      <a href="/#spices" class="text-link">Back to the spice collection</a>${label('THE ART OF SPICES')}
+      <a href="${sitePath('/#spices')}" class="text-link">Back to the spice collection</a>${label('THE ART OF SPICES')}
       <h1>${spice.name}</h1><p class="botanical">${spice.botanical}</p><p>${spice.flavour}.</p>
-      ${button('/?spice='+spice.id+'#quotation','Request Bulk Quotation')}</div>
+      ${button(sitePath('/?spice='+spice.id+'#quotation'),'Request Bulk Quotation')}</div>
       <div class="product-image">${image(spice.id,spice.name,'',false)}</div></div></section>
       <section class="section product-specs"><div class="container"><h2>Product profile</h2>${details(spice)}</div></section>
       <section class="section product-food"><div class="container editorial"><div class="editorial-image">${image('food-'+spice.id,spice.dish)}</div>
-      <div class="editorial-copy">${label('CULINARY USES')}<h2>${spice.dish}</h2><p>${spice.story}</p><a class="text-link" href="/#culinary">Explore culinary uses</a></div></div></section>`,
+      <div class="editorial-copy">${label('CULINARY USES')}<h2>${spice.dish}</h2><p>${spice.story}</p><a class="text-link" href="${sitePath('/#culinary')}">Explore culinary uses</a></div></div></section>`,
   }));
 }));
 
@@ -197,8 +212,8 @@ const legal = {
   terms:['Terms and Conditions',`<p>The website presents general spice information and an enquiry service for business buyers. It does not accept payment or place orders.</p><h2>Quotations and availability</h2><p>Origin, grade, product form, lot specifications, packaging, price and availability are confirmed in writing for each order. Quantity conversions are informational. Reference exchange rates can change and do not determine an order price.</p><h2>Trade and delivery</h2><p>Delivery, documentation and payment terms depend on the product, destination and conditions agreed in writing with the buyer.</p><h2>Contact</h2><p>For questions about a quotation, email <a href="mailto:${company.email}">${company.email}</a>.</p>`],
 };
 for(const [slug,[title,copy]] of Object.entries(legal)) {
-  await mkdir('dist/'+slug,{recursive:true});
-  await writeFile('dist/'+slug+'/index.html',page({title:title+' | BEST IMPEX PVT LTD',description:title+' for BEST IMPEX PVT LTD.',path:'/'+slug+'/',html:`<article class="section legal"><div class="container"><h1>${title}</h1>${copy}</div></article>`}));
+  await mkdir(output+'/'+slug,{recursive:true});
+  await writeFile(output+'/'+slug+'/index.html',page({title:title+' | BEST IMPEX PVT LTD',description:title+' for BEST IMPEX PVT LTD.',path:'/'+slug+'/',html:`<article class="section legal"><div class="container"><h1>${title}</h1>${copy}</div></article>`}));
 }
-await writeFile('dist/robots.txt',`User-agent: *\nAllow: /\nSitemap: ${company.origin}/sitemap.xml\n`);
-await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/',...paths,'/privacy/','/terms/'].map(path=>`<url><loc>${company.origin}${path}</loc></url>`).join('')}</urlset>\n`);
+await writeFile(output + '/robots.txt',`User-agent: *\nAllow: /\nSitemap: ${absolute('/sitemap.xml')}\n`);
+await writeFile(output + '/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/',...paths,'/privacy/','/terms/'].map(path=>`<url><loc>${absolute(path)}</loc></url>`).join('')}</urlset>\n`);

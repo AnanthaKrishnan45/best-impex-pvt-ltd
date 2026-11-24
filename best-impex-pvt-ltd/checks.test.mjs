@@ -59,3 +59,22 @@ test('uses supplied business contact information and has both forms', () => {
   assert.ok(about.includes('November 2026'));
   assert.ok(!about.includes(company.email) && !about.includes(company.address));
 });
+
+test('GitHub Pages build keeps every page and asset under the repository path', async () => {
+  const origin = 'https://ananthakrishnan45.github.io';
+  const base = '/best-impex-pvt-ltd';
+  const pages = ['/', '/privacy/', '/terms/', ...spices.map(spice => '/spices/' + spice.id + '/')];
+  await access('docs/.nojekyll');
+  for (const path of pages) {
+    const html = await readFile('docs' + path + 'index.html', 'utf8');
+    assert.ok(html.includes('rel="canonical" href="' + origin + base + path + '"'));
+    for (const [, reference] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
+      const url = new URL(reference, origin + base + path);
+      if (url.origin !== origin) continue;
+      assert.ok(url.pathname.startsWith(base + '/'), reference);
+      const file = 'docs' + url.pathname.slice(base.length) + (url.pathname.endsWith('/') ? 'index.html' : '');
+      await access(file);
+      if (url.hash) assert.ok((await readFile(file, 'utf8')).includes('id="' + url.hash.slice(1) + '"'), reference);
+    }
+  }
+});
