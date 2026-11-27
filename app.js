@@ -230,7 +230,7 @@ for (const form of document.querySelectorAll('[data-enquiry]')) {
       const text = field instanceof HTMLSelectElement ? field.selectedOptions[0].textContent : value;
       return enquiryLabels[key] + ': ' + text;
     });
-    const message = 'Hello BEST IMPEX PVT LTD,\n\n' + type + '\n\n' + lines.join('\n');
+    const message = 'Hello BEST IMPEX LINK PVT LTD,\n\n' + type + '\n\n' + lines.join('\n');
     mail.href = 'mailto:' + company.email + '?subject=' + encodeURIComponent(type) + '&body=' + encodeURIComponent(message);
     chat.href = company.whatsapp + '?text=' + encodeURIComponent(message);
 
@@ -253,7 +253,7 @@ for (const form of document.querySelectorAll('[data-enquiry]')) {
         signal:AbortSignal.timeout(12000),
       });
       if (!response.ok || (await response.json()).accepted !== true) throw new Error('Delivery was not confirmed');
-      status.textContent = 'Your enquiry was received by BEST IMPEX PVT LTD.';
+      status.textContent = 'Your enquiry was received by BEST IMPEX LINK PVT LTD.';
       fallback.hidden = true;
       form.reset();
     } catch {
