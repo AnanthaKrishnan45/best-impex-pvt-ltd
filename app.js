@@ -231,7 +231,10 @@ for (const form of document.querySelectorAll('[data-enquiry]')) {
       return enquiryLabels[key] + ': ' + text;
     });
     const message = 'Hello BEST IMPEX LINK PVT LTD,\n\n' + type + '\n\n' + lines.join('\n');
-    mail.href = 'mailto:' + company.email + '?subject=' + encodeURIComponent(type) + '&body=' + encodeURIComponent(message);
+    mail.href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(company.email) + '&su=' + encodeURIComponent(type) + '&body=' + encodeURIComponent(message);
+    mail.target = '_blank';
+    mail.rel = 'noopener noreferrer';
+    mail.textContent = 'Continue with Gmail';
     chat.href = company.whatsapp + '?text=' + encodeURIComponent(message);
 
     if (!settings.enquiryEndpoint) {
